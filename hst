@@ -1,0 +1,5 @@
+#!/bin/sh
+
+copy=$(cat ~/.zsh_history | cut -c 16- | fzf --tac)
+# gets rid of the trailing newline (hence the -n flag)
+echo -n $copy | xclip -selection clipboard

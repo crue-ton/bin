@@ -1,0 +1,52 @@
+#!/bin/sh
+
+
+# setbg, an easy script for my dwm build.
+# tweaked/added code from bugswriters script of the same name
+
+# randomly picks a wallpaper from wallpapers folder if no flag/query
+if [ -z "$*" ];then
+    echo "Choosing a random wallpaper..."
+    wall=$(find $HOME/.wallpapers -type f | shuf -n 1)
+    echo ${wall##*/}
+    echo "Seting up wallpaper..."
+    xwallpaper --zoom $wall
+    echo "Generating pywal colorschemes..."
+    wal -i $wall >/dev/null
+    sed -i 'N;$!P;D' $HOME/.cache/wal/colors-wal-dwm.h
+    (cd $HOME/.local/src/dwm && sudo make clean install>/dev/null)
+    (cd $HOME/.local/src/dmenu && sudo make clean install>/dev/null)
+    echo "^_^ please restart dwm now!"
+
+# shows help text
+elif [ "$*" = "-h" ] || [ "$*" = "--help" ];then
+    printf '%s\n' "
+flags:
+  -h|--help  display help text
+  -s         choose specific background using sxiv
+             choose wallpaper by hitting m and q to quit
+	     if multiple wallpapers are chosen, one will
+             be randomly chosen out of the n amount of them
+
+	"
+
+# uses sxiv to show wallpapers in folder
+elif [ "$*" = "-s" ];then
+    wall=$(sxiv -tpfo -z 200 $HOME/.wallpapers | tr ' ' '\n' | shuf -n 1) # you are able to choose multiple wallpapers which then are
+    if [ -z "$wall" ];then # checks to see if no wallpapers were chosen   ## randomly selected between n amount, and you can just choose one.
+      echo "no wallpapers selected!"
+      exit 0
+    else
+      echo $wall
+      echo "Setting up wallpaper..."
+      xwallpaper --zoom $wall
+      echo "Generating pywal colorschemes..."
+      wal -i $wall >/dev/null
+      sed -i 'N;$!P;D' $HOME/.cache/wal/colors-wal-dwm.h
+      (cd $HOME/.local/src/dwm && sudo make clean install>/dev/null)
+      (cd $HOME/.local/src/dmenu && sudo make clean install>/dev/null)
+      echo "^_^ please restart dwm now!"
+   fi
+else
+    echo "idfk, a error accured ig, how did you do this?!" # self explnatory lol
+fi
