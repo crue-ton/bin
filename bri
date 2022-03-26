@@ -1,0 +1,12 @@
+#!/bin/sh
+
+#simple script to adjust my brightness
+
+current=$(xrandr --prop --verbose | grep -A10 " connected" | grep "Brightness")
+current=${current##*: }
+query=$(printf '%s' "$*")
+
+case "$query" in (-*) query=${query##*-}; number=$(bc <<< "$current - $query") ; esac
+case "$query" in (+*) query=${query##*+}; number=$(bc <<< "$current + $query") ; esac
+
+xrandr --output eDP-1 --brightness $number
