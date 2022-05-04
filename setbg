@@ -12,16 +12,17 @@ alias wal=$HOME/.local/bin/wal
 main() {
   echo $wall
   echo "Setting up wallpaper..."
-  xwallpaper --zoom $wall
-  echo "Generating pywal colorschemes..."
-  wal -i $wall >/dev/null
   sed -i d $HOME/.cache/setbg/setbg.cache
   echo $wall > $HOME/.cache/setbg/setbg.cache
-  (cd $HOME/.local/src/dwm && sudo make clean install>/dev/null)
-  (cd $HOME/.local/src/dmenu && sudo make clean install>/dev/null)
+  xwallpaper --zoom $wall
+  echo "Generating pywal colorschemes..."
+  wal --backend schemer2 -q -i $wall
   killall dunst
   exec dunst & 2>&1
-  echo "^_^ please restart dwm now!"
+  ext=$(echo ${wall##*/})
+  ext=$(echo ${ext##*.})
+  rm $HOME/Projects/html_clock/assets/image.*
+  ln -s $wall $HOME/Projects/html_clock/assets/image.$ext
 }
 
 # stolen from dylanaraps pfetch
@@ -79,7 +80,7 @@ flags:
     else
 	echo $wall
         xwallpaper --zoom $wall
-        wal -i $wall >/dev/null
+        wal --backend schemer2 -i $wall >/dev/null
     fi
   ;;
   (*)
