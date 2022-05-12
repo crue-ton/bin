@@ -1,4 +1,4 @@
-# scripts
+# 🗑bin
 personal scripts i use on a daily basis
 
 ## bri
