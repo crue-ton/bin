@@ -44,6 +44,8 @@ flags:
              choose wallpaper by hitting m and q to quit
        if multiple wallpapers are chosen, one will
              be randomly chosen out of the n amount of them
+  -l         use last used wallpaper
+  -d         use specific wallpaper without using -s ex. 'setbg -d ./wall.png'
   "
   ;;
   (-s)
@@ -61,11 +63,11 @@ flags:
     fi
   ;;
    (-d*)
-    wall=$*
+    wall=$@
     wall=$(echo $wall | sed 's/-d //')
     if [ -z "$wall" ];then
       echo "no wallpapers selected!"
-      exit 0
+      exit 1
     else
       main 
     fi
