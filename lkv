@@ -1,0 +1,15 @@
+#!/bin/sh
+
+ver=$(
+curl -s https://kernel.org \
+	| grep -A 1 "latest_link" \
+	| tail -n +2 \
+	| grep -o ">.*<" \
+	| sed 's/>//g' \
+	| sed 's/<//g'
+)
+userver=$(uname -r)
+echo "latest kernel ver: $ver"
+echo "your kernel ver: $userver" # uses uname -r to get current kernel version of the user, 
+                                    ## some may be behind cause of how sys updates are rolled out
+				    ### e.g like how the kernel ver on arch could be 5.16.13, while current is 5.16.14

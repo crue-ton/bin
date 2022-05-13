@@ -17,18 +17,11 @@ main() {
   xwallpaper --zoom $wall
   echo "Generating pywal colorschemes..."
   wal --backend schemer2 -q -i $wall
-  killall dunst
+  pkill dunst
   exec dunst & 2>&1
-  ext=$(echo ${wall##*/})
-  ext=$(echo ${ext##*.})
-  rm $HOME/Projects/html_clock/assets/image.*
-  ln -s $wall $HOME/Projects/html_clock/assets/image.$ext
-}
-
-# stolen from dylanaraps pfetch
-has() {
-  _cmd=$(command -v "$1") 2>/dev/null || return 1
-  [ -x "$_cmd" ] || return 1
+  spicetify -qn apply
+  $HOME/.scripts/wal-grub
+  betterlockscreen -u $wall
 }
 
 #: }}}
@@ -44,12 +37,10 @@ flags:
              choose wallpaper by hitting m and q to quit
        if multiple wallpapers are chosen, one will
              be randomly chosen out of the n amount of them
-  -l         use last used wallpaper
-  -d         use specific wallpaper without using -s ex. 'setbg -d ./wall.png'
   "
   ;;
   (-s)
-    if has sxiv;then
+    if [ -f $(which sxiv) ];then
       wall=$(sxiv -tpfo -z 200 $HOME/.wallpapers | tr ' ' '\n' | shuf -n 1) # you are able to choose multiple wallpapers which then are
       if [ -z "$wall" ];then # checks to see if no wallpapers were chosen   ## randomly selected between n amount, and you can just choose one.
         echo "no wallpapers selected!"
@@ -63,11 +54,11 @@ flags:
     fi
   ;;
    (-d*)
-    wall=$@
+    wall=$*
     wall=$(echo $wall | sed 's/-d //')
     if [ -z "$wall" ];then
       echo "no wallpapers selected!"
-      exit 1
+      exit 0
     else
       main 
     fi

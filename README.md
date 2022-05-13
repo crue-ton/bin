@@ -13,3 +13,6 @@ views my .zsh_history file in fzf and copys my choice from fzf to my clipboard u
 
 ## setbg
 sets my bg and generates a color scheme for most of my system (including firefox and spotify!)
+
+## lkv
+get current linux kernel from the linux website and show current linux kernel of system
