@@ -1,86 +1,90 @@
-#!/bin/sh
-# vim:foldmethod=marker
+#!/bin/bash
 
+alias wal="~/.local/bin/wal"
 
-# setbg, an easy script for my dwm build.
-# tweaked/added code from bugswriters script of the same name
-
-alias wal=$HOME/.local/bin/wal
-
-#: Functions {{{
+backend="wal"
+backup="schemer2"
 
 main() {
-  echo $wall
   echo "Setting up wallpaper..."
-  sed -i d $HOME/.cache/setbg/setbg.cache
   echo $wall > $HOME/.cache/setbg/setbg.cache
   xwallpaper --zoom $wall
   echo "Generating pywal colorschemes..."
-  wal --backend schemer2 -q -i $wall
+  wal -q --backend $backend -i $wall
+  if [ $? != 0];then
+     wal -q --backend $backup -i $wall
+  fi
   pkill dunst
   exec dunst & 2>&1
-  spicetify -qn apply
+  ~/.config/polybar/launch.sh
+  ~/.spicetify/spicetify -qn apply
   $HOME/.scripts/wal-grub
-  betterlockscreen -u $wall
+  betterlockscreen -q -u $wall
+  pywalfox update
 }
 
-#: }}}
-
-#: Case Statement {{{
-
-case $* in
-  (-h*|--help*)
-    printf '%s\n' "
+help_message() {
+  printf '%s\n' "
 flags:
-  -h|--help  display help text
+  -h  display help text
   -s         choose specific background using sxiv
              choose wallpaper by hitting m and q to quit
-       if multiple wallpapers are chosen, one will
-             be randomly chosen out of the n amount of them
-  "
-  ;;
-  (-s)
-    if [ -f $(which sxiv) ];then
-      wall=$(sxiv -tpfo -z 200 $HOME/.wallpapers | tr ' ' '\n' | shuf -n 1) # you are able to choose multiple wallpapers which then are
-      if [ -z "$wall" ];then # checks to see if no wallpapers were chosen   ## randomly selected between n amount, and you can just choose one.
-        echo "no wallpapers selected!"
-        exit 0
-      else
-        main
-      fi
-    else
-        echo "sxiv not installed, please install it to use this flag"
-	echo "arch: sudo pacman -S sxiv\ndebian: sudo apt install sxiv"
-    fi
-  ;;
-   (-d*)
-    wall=$*
-    wall=$(echo $wall | sed 's/-d //')
-    if [ -z "$wall" ];then
-      echo "no wallpapers selected!"
-      exit 0
-    else
-      main 
-    fi
-  ;;
-  (-l)
-    echo "Using Last Wallpaper Used..."
-    wall=$(cat $HOME/.cache/setbg/setbg.cache)
-    if [ -z "$wall" ];then
-        echo "no wallpaper found..."
-	echo "if there is a wallpaper in the cache, please open a issue/pr"
-	exit 0
-    else
-	echo $wall
-        xwallpaper --zoom $wall
-        wal --backend schemer2 -i $wall >/dev/null
-    fi
-  ;;
-  (*)
-    echo "Choosing Random Wallpaper..."
-    wall=$(find $HOME/.wallpapers -type f | shuf -n 1)
-    echo ${wall##*/}
-    main
-  ;;
-esac
-#: }}}
+  -d         choose wallpaper using terminal
+               example: setbg -d ./wallpaper.png
+  -l         use last used wallpaper (found in cache file)
+"
+
+}
+
+if [ "$#" == 0 ];then
+  wall=$(find $HOME/.wallpapers -type f | shuf -n 1)
+  main
+fi
+
+while getopts "hsld:" flag; do
+   case $flag in
+     h)
+       help_message
+     ;;
+     s)
+       if [ -z $(which sxiv) ];then
+	printf "sxiv not found on your system!\n
+	        arch: pacman -S sxiv\n
+		debian: apt install sxiv"
+	exit 1
+       fi
+       wall=$(sxiv -tpfo -z 200 $HOME/.wallpapers \
+	       | tr ' ' '\n' \
+	       | shuf -n 1)
+       if [ -z "$wall" ];then
+	 echo "no wallpapers selected!"; exit 1
+       fi
+       main
+     ;;
+     l)
+       wall=$(cat $HOME/.cache/setbg/setbg.cache)
+       if [ -z "$wall" ];then
+	 printf '%s\n' "
+	 wallpaper not found...
+	 if there is a wallpaper in the cache please open a pr/issue"
+       fi
+       main
+     ;;
+     d)
+       wall=$2
+       if [ -z "$wall" ];then
+	 echo "no wallpapers selected!"; exit 1
+       fi
+       main
+     ;;
+     \?)
+       printf "invalid command!\n"
+       help_message
+       exit 1
+     ;;
+     :)
+       echo "$OPTARG requires an argument"
+       exit 1
+     ;;
+   esac
+done
