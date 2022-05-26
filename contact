@@ -1,0 +1,51 @@
+#!/bin/bash
+
+create() {
+   read -p "Contact Name: " CONTACT_NAME
+   read -p "Phone Number: " CONTACT_NUMB
+   printf "$CONTACT_NUMB correct for $CONTACT_NAME?"
+   read -p "[Y/n] " CHOICE
+}
+
+write() {
+   echo "$CONTACT_NAME, $CONTACT_NUMB" >> ~/.local/share/contacts.txt
+}
+
+CONTACTS_DIR=$HOME/.local/share/contacts.txt
+
+if [ -z $(which fzf 2>/dev/null) ] && [ -z $(which xclip 2>/dev/null) ];then
+   printf "fzf and xclip not found!\nplease install them!"
+   exit 1
+elif [ -z $(which fzf 2>/dev/null) ];then
+   printf "fzf not found, please intsall it!"
+   exit 1
+elif [ -z $(which xclip 2>/dev/null) ];then
+   printf "xclip not found, please install it!"
+   exit 1
+fi
+
+printf "%s\n" '
+~~~~~~~~~~~~~~
+ 1. Add new Contact
+ 2. Go through Contacts
+
+ ^C to exit
+~~~~~~~~'
+
+read -p "> " choice
+
+case $choice in
+  (1)
+     create
+     case $CHOICE in ([Yy]|[Yy][Ee][Ss]) write ; esac
+     case $CHOICE in ([Nn]|[Nn][Oo]) create ;    esac
+  ;;
+  (2)
+     contact="$(cat $CONTACTS_DIR | sort -d | fzf --tac)"
+     read -p "Save # to clipboard? [Y/n] " save_ch
+     case $save_ch in ([Yy]|[Yy][Ee][Ss]) echo -n $contact | cut -d',' -f2  | xclip -sel c ; esac
+     case $save_ch in ([Nn]|[Nn][Oo]) echo -n $contact && exit 0 ; esac
+  ;;
+  (*) echo "not valid choice!"; exit 1 ;
+
+esac
