@@ -1,0 +1,25 @@
+#!/bin/sh
+
+read -p ":: Add scripts to local bin repo? [Y/n] " add
+
+case $add in ([Nn]|[Nn][Oo]) exit 0 ; esac
+
+# add files to local repo
+printf "copying files to local repo..."
+cp ~/.local/bin/bri     ~/.my-repos/bin/bri
+cp ~/.local/bin/hst     ~/.my-repos/bin/hst
+cp ~/.local/bin/lkv     ~/.my-repos/bin/lkv
+cp ~/.local/bin/setbg   ~/.my-repos/bin/setbg
+cp ~/.local/bin/contact ~/.my-repos/bin/contact
+
+# add files to future commit?
+printf "adding to future commit"
+read -p ":: Add scripts to future commit? [Y/n] " com
+
+case $com in ([Nn]|[Nn][Oo]) exit 0 ; esac
+
+git add . && git commit -m "updates"
+
+printf "now just do 'git push -u'!"
+printf "\nFinished!"
+exit 0

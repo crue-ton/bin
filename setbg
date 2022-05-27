@@ -3,11 +3,14 @@
 alias wal="~/.local/bin/wal"
 
 backend="wal"
-backup="schemer2"
+backup="colorz"
 
+# You can edit this main() function to include any
+#: programs, commands, and etc.
 main() {
   echo "Setting up wallpaper..."
   echo $wall > $HOME/.cache/setbg/setbg.cache
+  #nitrogen --set-scaled $wall
   xwallpaper --zoom $wall
   echo "Generating pywal colorschemes..."
   wal -q --backend $backend -i $wall
@@ -18,11 +21,12 @@ main() {
   exec dunst & 2>&1
   ~/.config/polybar/launch.sh
   ~/.spicetify/spicetify -qn apply
-  $HOME/.scripts/wal-grub
+  #$HOME/.scripts/wal-grub
   betterlockscreen -q -u $wall
   pywalfox update
 }
 
+# Made it a function to be used in errors
 help_message() {
   printf '%s\n' "
 flags:
@@ -36,23 +40,37 @@ flags:
 
 }
 
+# Checks to see if no arguments were passed
 if [ "$#" == 0 ];then
   wall=$(find $HOME/.wallpapers -type f | shuf -n 1)
   main
 fi
 
-while getopts "hsld:" flag; do
+# If arguments are passed, then we go through here
+#: using bash's built in getopts tool for easy flags
+#: Basically, if the flag doesn't have a colon after it,
+#: the flag doesn't use any kind of argument after, the colon
+#: means that the flag requires an argument, in this case the flag -d
+#: requires the background file after the -d flag.
+while getopts "hsld:" flag; do 
    case $flag in
      h)
        help_message
      ;;
      s)
+       # Checks if sxiv is on the system (create an issue if there is a better way to do this!)
        if [ -z $(which sxiv) ];then
+	#: Print message telling user sxiv is not found
+	#: Please open an issue for more package managers to be added
 	printf "sxiv not found on your system!\n
 	        arch: pacman -S sxiv\n
 		debian: apt install sxiv"
 	exit 1
        fi
+       #: Mark/Choose files using 'm' in the sxiv menu,
+       #: This also accounts for multiple pictures chosen,
+       #: Which then splits the chosen wallpapers into new lines,
+       #: and then chooses one. 
        wall=$(sxiv -tpfo -z 200 $HOME/.wallpapers \
 	       | tr ' ' '\n' \
 	       | shuf -n 1)
@@ -62,6 +80,7 @@ while getopts "hsld:" flag; do
        main
      ;;
      l)
+       # Use the wallpaper in found in the cache file 
        wall=$(cat $HOME/.cache/setbg/setbg.cache)
        if [ -z "$wall" ];then
 	 printf '%s\n' "
@@ -71,6 +90,8 @@ while getopts "hsld:" flag; do
        main
      ;;
      d)
+       # Yes I know, probably not the greatest way to do this,
+       #: But the -d flag shouldn't be used with anything else.
        wall=$2
        if [ -z "$wall" ];then
 	 echo "no wallpapers selected!"; exit 1
@@ -78,11 +99,13 @@ while getopts "hsld:" flag; do
        main
      ;;
      \?)
+       # If wrong flag/argument used, print this.
        printf "invalid command!\n"
        help_message
        exit 1
      ;;
      :)
+       # If a flag that requires an argument isn't given one, print this.
        echo "$OPTARG requires an argument"
        exit 1
      ;;

@@ -42,8 +42,9 @@ case $choice in
   ;;
   (2)
      contact="$(cat $CONTACTS_DIR | sort -d | fzf --tac)"
+     if [ -z "$contact" ];then exit 0; fi
      read -p "Save # to clipboard? [Y/n] " save_ch
-     case $save_ch in ([Yy]|[Yy][Ee][Ss]) echo -n $contact | cut -d',' -f2  | xclip -sel c ; esac
+     case $save_ch in ([Yy]|[Yy][Ee][Ss]) copy="$(echo $contact | cut -d',' -f2)"; echo -n $copy | xclip -selection clipboard; esac
      case $save_ch in ([Nn]|[Nn][Oo]) echo -n $contact && exit 0 ; esac
   ;;
   (*) echo "not valid choice!"; exit 1 ;

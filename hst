@@ -1,3 +1,6 @@
 #!/usr/bin/env fish
 
-history | fzf
+builtin history merge
+set copy (builtin history | fzf)
+
+echo -n $copy | xclip -selection clipboard
