@@ -5,7 +5,7 @@ read -p ":: Add scripts to local bin repo? [Y/n] " add
 case $add in ([Nn]|[Nn][Oo]) exit 0 ; esac
 
 # add files to local repo
-printf "copying files to local repo..."
+printf "\ncopying files to local repo...\n"
 cp ~/.local/bin/bri     ~/.my-repos/bin/bri
 cp ~/.local/bin/hst     ~/.my-repos/bin/hst
 cp ~/.local/bin/lkv     ~/.my-repos/bin/lkv
@@ -13,13 +13,7 @@ cp ~/.local/bin/setbg   ~/.my-repos/bin/setbg
 cp ~/.local/bin/contact ~/.my-repos/bin/contact
 
 # add files to future commit?
-printf "adding to future commit"
-read -p ":: Add scripts to future commit? [Y/n] " com
+read -p ":: Add scripts to future commit? [Y/n] " git_add
 
-case $com in ([Nn]|[Nn][Oo]) exit 0 ; esac
-
-git add . && git commit -m "updates"
-
-printf "now just do 'git push -u'!"
-printf "\nFinished!"
-exit 0
+case "$git_add" in ([Yy]|[Yy][Ee][Ss]) cd ~/.my-repos/bin; git add .; printf "\nFinished!\n" ; esac
+case "$git_add" in ([Nn]|[Nn][Oo]) printf "\nFinished!\n"; exit 0 ; esac
