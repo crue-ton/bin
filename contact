@@ -3,15 +3,19 @@
 create() {
    read -p "Contact Name: " CONTACT_NAME
    read -p "Phone Number: " CONTACT_NUMB
-   printf "$CONTACT_NUMB correct for $CONTACT_NAME?"
-   read -p "[Y/n] " CHOICE
+   read -p ":: $CONTACT_NUMB correct for $CONTACT_NAME? [Y/n] " CHOICE
 }
 
 write() {
    echo "$CONTACT_NAME, $CONTACT_NUMB" >> ~/.local/share/contacts.txt
 }
 
+remove (){
+   grep -v "$contact" $CONTACTS_DIR > ~/.local/share/temp && mv ~/.local/share/temp $CONTACTS_DIR
+}
+
 CONTACTS_DIR=$HOME/.local/share/contacts.txt
+clear -x
 
 if [ -z $(which fzf 2>/dev/null) ] && [ -z $(which xclip 2>/dev/null) ];then
    printf "fzf and xclip not found!\nplease install them!"
@@ -24,10 +28,10 @@ elif [ -z $(which xclip 2>/dev/null) ];then
    exit 1
 fi
 
-printf "%s\n" '
-~~~~~~~~~~~~~~
+printf "%s\n" '~~~~~~~~~~~~~~
  1. Add new Contact
- 2. Go through Contacts
+ 2. Remove Contact
+ 3. Go through Contacts
 
  ^C to exit
 ~~~~~~~~'
@@ -41,6 +45,13 @@ case $choice in
      case $CHOICE in ([Nn]|[Nn][Oo]) create ;    esac
   ;;
   (2)
+     contact="$(cat $CONTACTS_DIR | sort -d | fzf --tac)"
+     if [ -z "$contact" ];then exit 0; fi
+     read -p "Remove contact $contact? [Y/n] " rem_ch
+     case $rem_ch in ([Yy]|[Yy][Ee][Ss]) remove; esac
+     case $rem_ch in ([Nn]|[Nn][Oo]) exit 0 ; esac
+  ;;
+  (3)
      contact="$(cat $CONTACTS_DIR | sort -d | fzf --tac)"
      if [ -z "$contact" ];then exit 0; fi
      read -p "Save # to clipboard? [Y/n] " save_ch
