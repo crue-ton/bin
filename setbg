@@ -2,6 +2,7 @@
 
 alias wal="~/.local/bin/wal"
 
+# Set main backend and its backup if main one fails
 backend="wal"
 backup="colorz"
 
@@ -10,8 +11,6 @@ backup="colorz"
 main() {
   echo "Setting up wallpaper..."
   echo $wall > $HOME/.cache/setbg/setbg.cache
-  #nitrogen --set-scaled $wall
-  xwallpaper --zoom $wall
   echo "Generating pywal colorschemes..."
   wal -q --backend $backend -i $wall
   if [ $? != 0];then
@@ -21,7 +20,6 @@ main() {
   exec dunst & 2>&1
   ~/.config/polybar/launch.sh
   ~/.spicetify/spicetify -qn apply
-  #$HOME/.scripts/wal-grub
   betterlockscreen -q -u $wall
   pywalfox update
 }
@@ -60,7 +58,6 @@ while getopts "hsld:" flag; do
      s)
        # Checks if sxiv is on the system (create an issue if there is a better way to do this!)
        if [ -z $(which sxiv) ];then
-	#: Print message telling user sxiv is not found
 	#: Please open an issue for more package managers to be added
 	printf "sxiv not found on your system!\n
 	        arch: pacman -S sxiv\n

@@ -1,6 +1,8 @@
-#!/usr/bin/env fish
+#!/bin/bash
 
-builtin history merge
-set copy (builtin history | fzf)
+copy=$(cat $HOME/.local/share/fish/fish_history \
+ | grep -o "\- cmd: .*" \
+ | sed 's/- cmd: //g' \
+ | fzf --tac)
 
 echo -n $copy | xclip -selection clipboard
